@@ -1,0 +1,189 @@
+Simple CRUD operations
+
+Simple application to perform CRUD operation using HTML & JavaScript (jQuery allowed).
+1. Use a GET request to get users list and generate a table (Don't use any table libraries)
+
+index.html 
+style.css
+script.js
+
+2.When user click on add button load a simple form in a modal, where you can enter fields and
+submit the form. On submit send POST request to API and also refresh the table data.
+
+CRUD
+index.html
+styles.css
+script.js
+
+3.User can check the checkboxes and can delete multiple users at a time.
+
+delete.html
+
+4. And also implement Client side pagination 
+
+1.Add the JavaScript to your page footer (see full script below).
+2.Add CSS to style the navigation bar (see an example below).
+3.Define an ID on the table you want to scroll.
+4.Place an empty DOM element where you want to display the navigation bar.
+5.Initialise the pager.
+
+
+if you have a huge table, it may be fully displayed before the JavaScript in the footer will be executed.
+ To avoid this, you can set the table as hidden by default using CSS, and make it visible using JavaScript after the pager.showPage() call.
+
+<table id="pager" class="wp-list-table widefat striped posts">
+    <thead>
+        <tr>
+            <th>Column #1</th>
+            <th>Column #2</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <th>Info #1</th>
+            <th>Info #2</th>
+        </tr>
+        <tr>
+            <th>Info #1</th>
+            <th>Info #2</th>
+        </tr>
+        <tr>
+            <th>Info #1</th>
+            <th>Info #2</th>
+        </tr>
+    </tbody>
+</table>
+
+<div id="pageNavPosition" class="pager-nav"></div>
+
+<script src="PagerJS.js" defer></script>
+<script>
+<script>
+let pager = new Pager('pager', 3);
+
+pager.init();
+pager.showPageNav('pager', 'pageNavPosition');
+pager.showPage(1);
+</script>
+</script>
+
+2.PagerJS.js
+
+/* eslint-env browser */
+/* global document */
+
+function Pager(tableName, itemsPerPage) {
+    'use strict';
+
+    this.tableName = tableName;
+    this.itemsPerPage = itemsPerPage;
+    this.currentPage = 1;
+    this.pages = 0;
+    this.inited = false;
+
+    this.showRecords = function (from, to) {
+        let rows = document.getElementById(tableName).rows;
+
+        // i starts from 1 to skip table header row
+        for (let i = 1; i < rows.length; i++) {
+            if (i < from || i > to) {
+                rows[i].style.display = 'none';
+            } else {
+                rows[i].style.display = '';
+            }
+        }
+    };
+
+    this.showPage = function (pageNumber) {
+        if (!this.inited) {
+            // Not initialized
+            return;
+        }
+
+        let oldPageAnchor = document.getElementById('pg' + this.currentPage);
+        oldPageAnchor.className = 'pg-normal';
+
+        this.currentPage = pageNumber;
+        let newPageAnchor = document.getElementById('pg' + this.currentPage);
+        newPageAnchor.className = 'pg-selected';
+
+        let from = (pageNumber - 1) * itemsPerPage + 1;
+        let to = from + itemsPerPage - 1;
+        this.showRecords(from, to);
+
+        let pgNext = document.querySelector('.pg-next'),
+            pgPrev = document.querySelector('.pg-prev');
+
+        if (this.currentPage == this.pages) {
+            pgNext.style.display = 'none';
+        } else {
+            pgNext.style.display = '';
+        }
+
+        if (this.currentPage === 1) {
+            pgPrev.style.display = 'none';
+        } else {
+            pgPrev.style.display = '';
+        }
+    };
+
+    this.prev = function () {
+        if (this.currentPage > 1) {
+            this.showPage(this.currentPage - 1);
+        }
+    };
+
+    this.next = function () {
+        if (this.currentPage < this.pages) {
+            this.showPage(this.currentPage + 1);
+        }
+    };
+
+    this.init = function () {
+        let rows = document.getElementById(tableName).rows;
+        let records = (rows.length - 1);
+
+        this.pages = Math.ceil(records / itemsPerPage);
+        this.inited = true;
+    };
+
+    this.showPageNav = function (pagerName, positionId) {
+        if (!this.inited) {
+            // Not initialized
+            return;
+        }
+
+        let element = document.getElementById(positionId),
+            pagerHtml = '<span onclick="' + pagerName + '.prev();" class="pg-normal pg-prev">«</span>';
+
+        for (let page = 1; page <= this.pages; page++) {
+            pagerHtml += '<span id="pg' + page + '" class="pg-normal pg-next" onclick="' + pagerName + '.showPage(' + page + ');">' + page + '</span>';
+        }
+
+        pagerHtml += '<span onclick="' + pagerName + '.next();" class="pg-normal">»</span>';
+
+        element.innerHTML = pagerHtml;
+    };
+}
+
+3.Sample CSS
+
+.pager-nav {
+    margin: 16px 0;
+}
+.pager-nav span {
+    display: inline-block;
+    padding: 4px 8px;
+    margin: 1px;
+    cursor: pointer;
+    font-size: 14px;
+    background-color: #FFFFFF;
+    border: 1px solid #e1e1e1;
+    border-radius: 3px;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+}
+.pager-nav span:hover,
+.pager-nav .pg-selected {
+    background-color: #f9f9f9;
+    border: 1px solid #CCCCCC;
+}
